@@ -20,6 +20,8 @@ Usage of boson:
         HTTP timeout for webhook request (default 0, i.e. no-timeout)
   -url string
         URL for webhook endpoint. It replaces "{{ line }}" token with got line string
+  -url-encode-body
+        Encode the body of webhook request with url (percent) encoding; for "application/x-www-form-urlencoded"
 ```
 
 ### Example: Send every line to the webhook endpoint

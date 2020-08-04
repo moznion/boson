@@ -30,6 +30,7 @@ func main() {
 	var webhookHeadersOpt stringSlice
 	var webhookBody string
 	var webhookTimeoutSec int
+	var urlEncodeBody bool
 
 	flag.BoolVar(&everyLine, "every-line", false, "Run with every-line mode")
 	flag.StringVar(&filterRegexp, "filter-regexp", "", "Regexp for line filtering, run with regexp-filter mode")
@@ -38,6 +39,7 @@ func main() {
 	flag.Var(&webhookHeadersOpt, "header", "HTTP header for webhook (example: `Content-Type: application/json`). It replaces \"{{ line }}\" token with got line string")
 	flag.StringVar(&webhookBody, "body", "", "HTTP body for webhook request")
 	flag.IntVar(&webhookTimeoutSec, "timeout-sec", 0, "HTTP timeout for webhook request (default 0, i.e. no-timeout)")
+	flag.BoolVar(&urlEncodeBody, "url-encode-body", false, "Encode the body of webhook request with url (percent) encoding; for \"application/x-www-form-urlencoded\"")
 
 	flag.Parse()
 
@@ -58,6 +60,7 @@ func main() {
 		webhookHeaders,
 		webhookBody,
 		time.Duration(webhookTimeoutSec)*time.Second,
+		urlEncodeBody,
 	)
 	if err != nil {
 		log.Fatalf("[error] %s", err)

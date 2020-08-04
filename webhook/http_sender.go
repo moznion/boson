@@ -4,21 +4,23 @@ import (
 	"errors"
 	"fmt"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 )
 
 // HTTPSender is a webhook client based on HTTP.
 type HTTPSender struct {
-	HTTPMethod string
-	URL        string
-	Headers    http.Header
-	Body       string
-	Client     *http.Client
+	HTTPMethod    string
+	URL           string
+	Headers       http.Header
+	Body          string
+	Client        *http.Client
+	URLEncodeBody bool
 }
 
 // NewHTTPSender returns a HTTPSender instance.
-func NewHTTPSender(httpMethod string, url string, headers http.Header, body string, timeout time.Duration) (*HTTPSender, error) {
+func NewHTTPSender(httpMethod string, url string, headers http.Header, body string, timeout time.Duration, urlEncodeBody bool) (*HTTPSender, error) {
 	if httpMethod == "" {
 		return nil, errors.New("http method has to have some value, but that is empty")
 	}
@@ -31,15 +33,16 @@ func NewHTTPSender(httpMethod string, url string, headers http.Header, body stri
 		URL:        url,
 		Headers:    headers,
 		Body:       body,
-		Client:     &http.Client{
+		Client: &http.Client{
 			Timeout: timeout,
 		},
+		URLEncodeBody: urlEncodeBody,
 	}, nil
 }
 
 // Send sends the request to webhook endpoint over HTTP.
 func (s *HTTPSender) Send(line string) error {
-	url := replacePlaceholder(s.URL, line)
+	webhookURL := replacePlaceholder(s.URL, line)
 
 	headers := make(http.Header)
 	for key, headerValues := range s.Headers {
@@ -53,8 +56,11 @@ func (s *HTTPSender) Send(line string) error {
 	}
 
 	body := replacePlaceholder(s.Body, line)
+	if s.URLEncodeBody {
+		body = url.QueryEscape(body)
+	}
 
-	req, err := http.NewRequest(s.HTTPMethod, url, strings.NewReader(body))
+	req, err := http.NewRequest(s.HTTPMethod, webhookURL, strings.NewReader(body))
 	if err != nil {
 		return err
 	}
