@@ -3,6 +3,7 @@ package webhook
 import (
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"net/url"
 	"strings"
@@ -76,5 +77,6 @@ func (s *HTTPSender) Send(line string) error {
 	if statusCode < 200 || statusCode >= 300 {
 		return fmt.Errorf("failed to send data to the webhook destination; statusCode = %d", statusCode)
 	}
+	log.Printf(`[info] sent %s request to %s; statusCode = %d, body = "%s"`, s.HTTPMethod, webhookURL, statusCode, lineForBody)
 	return nil
 }
