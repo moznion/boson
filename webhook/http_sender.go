@@ -11,16 +11,16 @@ import (
 
 // HTTPSender is a webhook client based on HTTP.
 type HTTPSender struct {
-	HTTPMethod    string
-	URL           string
-	Headers       http.Header
-	Body          string
-	Client        *http.Client
-	URLEncodeBody bool
+	HTTPMethod               string
+	URL                      string
+	Headers                  http.Header
+	Body                     string
+	Client                   *http.Client
+	URLEncodeBodyReplacement bool
 }
 
 // NewHTTPSender returns a HTTPSender instance.
-func NewHTTPSender(httpMethod string, url string, headers http.Header, body string, timeout time.Duration, urlEncodeBody bool) (*HTTPSender, error) {
+func NewHTTPSender(httpMethod string, url string, headers http.Header, body string, timeout time.Duration, urlEncodeBodyReplacement bool) (*HTTPSender, error) {
 	if httpMethod == "" {
 		return nil, errors.New("http method has to have some value, but that is empty")
 	}
@@ -36,7 +36,7 @@ func NewHTTPSender(httpMethod string, url string, headers http.Header, body stri
 		Client: &http.Client{
 			Timeout: timeout,
 		},
-		URLEncodeBody: urlEncodeBody,
+		URLEncodeBodyReplacement: urlEncodeBodyReplacement,
 	}, nil
 }
 
@@ -55,10 +55,11 @@ func (s *HTTPSender) Send(line string) error {
 		}()
 	}
 
-	body := replacePlaceholder(s.Body, line)
-	if s.URLEncodeBody {
-		body = url.QueryEscape(body)
+	lineForBody := line
+	if s.URLEncodeBodyReplacement {
+		lineForBody = url.QueryEscape(line)
 	}
+	body := replacePlaceholder(s.Body, lineForBody)
 
 	req, err := http.NewRequest(s.HTTPMethod, webhookURL, strings.NewReader(body))
 	if err != nil {
