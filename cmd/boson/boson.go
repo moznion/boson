@@ -23,14 +23,17 @@ func (s *stringSlice) Set(value string) error {
 }
 
 func main() {
-	var everyLine bool
-	var filterRegexp string
-	var webhookHTTPMethod string
-	var webhookURL string
-	var webhookHeadersOpt stringSlice
-	var webhookBody string
-	var webhookTimeoutSec int
-	var urlEncodeBodyReplacement bool
+	var (
+		everyLine                bool
+		filterRegexp             string
+		webhookHTTPMethod        string
+		webhookURL               string
+		webhookHeadersOpt        stringSlice
+		webhookBody              string
+		webhookTimeoutSec        int
+		urlEncodeBodyReplacement bool
+		dryRun                   bool
+	)
 
 	flag.BoolVar(&everyLine, "every-line", false, "Run with every-line mode")
 	flag.StringVar(&filterRegexp, "filter-regexp", "", "Regexp for line filtering, run with regexp-filter mode")
@@ -40,6 +43,7 @@ func main() {
 	flag.StringVar(&webhookBody, "body", "", "HTTP body for webhook request")
 	flag.IntVar(&webhookTimeoutSec, "timeout-sec", 0, "HTTP timeout for webhook request (default 0, i.e. no-timeout)")
 	flag.BoolVar(&urlEncodeBodyReplacement, "url-encode-body-replacement", false, "Encode the replacement of the body (i.e. the contents of \"{{ line }}\") of webhook request with url (percent) encoding; for \"application/x-www-form-urlencoded\"")
+	flag.BoolVar(&dryRun, "dry-run", false, "Run this application with dry-run (i.e. it doesn't send any requests to the webhook endpoint)")
 
 	flag.Parse()
 
@@ -61,6 +65,7 @@ func main() {
 		webhookBody,
 		time.Duration(webhookTimeoutSec)*time.Second,
 		urlEncodeBodyReplacement,
+		dryRun,
 	)
 	if err != nil {
 		log.Fatalf("[error] %s", err)

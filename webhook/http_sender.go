@@ -18,10 +18,11 @@ type HTTPSender struct {
 	Body                     string
 	Client                   *http.Client
 	URLEncodeBodyReplacement bool
+	DryRun                   bool
 }
 
 // NewHTTPSender returns a HTTPSender instance.
-func NewHTTPSender(httpMethod string, url string, headers http.Header, body string, timeout time.Duration, urlEncodeBodyReplacement bool) (*HTTPSender, error) {
+func NewHTTPSender(httpMethod string, url string, headers http.Header, body string, timeout time.Duration, urlEncodeBodyReplacement bool, dryRun bool) (*HTTPSender, error) {
 	if httpMethod == "" {
 		return nil, errors.New("http method has to have some value, but that is empty")
 	}
@@ -30,14 +31,15 @@ func NewHTTPSender(httpMethod string, url string, headers http.Header, body stri
 	}
 
 	return &HTTPSender{
-		HTTPMethod: httpMethod,
-		URL:        url,
-		Headers:    headers,
-		Body:       body,
+		HTTPMethod:               httpMethod,
+		URL:                      url,
+		Headers:                  headers,
+		Body:                     body,
+		URLEncodeBodyReplacement: urlEncodeBodyReplacement,
+		DryRun:                   dryRun,
 		Client: &http.Client{
 			Timeout: timeout,
 		},
-		URLEncodeBodyReplacement: urlEncodeBodyReplacement,
 	}, nil
 }
 
@@ -61,6 +63,11 @@ func (s *HTTPSender) Send(line string) error {
 		lineForBody = url.QueryEscape(line)
 	}
 	body := replacePlaceholder(s.Body, lineForBody)
+
+	if s.DryRun {
+		log.Printf(`[info] DRY-RUN MODE! %s request to %s; header = %v, body = "%s"`, s.HTTPMethod, webhookURL, headers, lineForBody)
+		return nil
+	}
 
 	req, err := http.NewRequest(s.HTTPMethod, webhookURL, strings.NewReader(body))
 	if err != nil {
