@@ -1,4 +1,5 @@
 check: test lint vet fmt-check
+ci-check: test vet fmt-check
 
 test:
 	go test -v -race ./...
