@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"os"
@@ -10,6 +12,11 @@ import (
 
 	"github.com/moznion/boson"
 	"github.com/moznion/boson/webhook"
+)
+
+var (
+	ver string
+	rev string
 )
 
 type stringSlice []string
@@ -34,6 +41,7 @@ func main() {
 		webhookTimeoutSec        int
 		urlEncodeBodyReplacement bool
 		dryRun                   bool
+		showVersion              bool
 	)
 
 	flag.BoolVar(&everyLine, "every-line", false, "Run with every-line mode. This mode sends all of lines to the webhook endpoint")
@@ -45,8 +53,18 @@ func main() {
 	flag.IntVar(&webhookTimeoutSec, "timeout-sec", 0, "HTTP timeout for webhook request (default 0, i.e. no-timeout)")
 	flag.BoolVar(&urlEncodeBodyReplacement, "url-encode-body-replacement", false, `Encode the replacement of the body (i.e. the contents of "{{ line }}" and "{{ $N }}") of webhook request with url (percent) encoding; for "application/x-www-form-urlencoded"`)
 	flag.BoolVar(&dryRun, "dry-run", false, "Run this application with dry-run (i.e. it doesn't send any requests to the webhook endpoint)")
+	flag.BoolVar(&showVersion, "version", false, "Show the version of this application")
 
 	flag.Parse()
+
+	if showVersion {
+		versionJSON, _ := json.Marshal(map[string]string{
+			"version":  ver,
+			"revision": rev,
+		})
+		fmt.Printf("%s\n", versionJSON)
+		return
+	}
 
 	webhookHeaders := make(http.Header)
 	for _, headerOpt := range webhookHeadersOpt {
