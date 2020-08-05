@@ -4,6 +4,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 	"strings"
 	"time"
 
@@ -75,5 +76,5 @@ func main() {
 	if err != nil {
 		log.Fatalf("[error] %s", err)
 	}
-	boson.Run(opt)
+	_ = boson.Run(os.Stdin, opt, false)
 }

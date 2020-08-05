@@ -3,8 +3,8 @@ package boson
 import (
 	"bufio"
 	"errors"
+	"io"
 	"log"
-	"os"
 	"regexp"
 
 	"github.com/moznion/boson/internal/filter"
@@ -42,8 +42,8 @@ func (o *Opt) GetFilter() filter.Filter {
 }
 
 // Run is the entry point of this application.
-func Run(opt *Opt) {
-	var stdinScanner = bufio.NewScanner(os.Stdin)
+func Run(reader io.Reader, opt *Opt, dieOnError bool) error {
+	var stdinScanner = bufio.NewScanner(reader)
 
 	lineFilter := opt.GetFilter()
 
@@ -52,7 +52,12 @@ func Run(opt *Opt) {
 		if parts := lineFilter.Find(line); len(parts) > 0 {
 			if err := opt.WebhookSender.Send(parts); err != nil {
 				log.Printf("[error] %s", err)
+				if dieOnError {
+					return err
+				}
 			}
 		}
 	}
+
+	return nil
 }
