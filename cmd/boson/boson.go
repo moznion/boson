@@ -35,14 +35,14 @@ func main() {
 		dryRun                   bool
 	)
 
-	flag.BoolVar(&everyLine, "every-line", false, "Run with every-line mode")
-	flag.StringVar(&filterRegexp, "filter-regexp", "", "Regexp for line filtering, run with regexp-filter mode")
+	flag.BoolVar(&everyLine, "every-line", false, "Run with every-line mode. This mode sends all of lines to the webhook endpoint")
+	flag.StringVar(&filterRegexp, "filter-regexp", "", `Regexp for line filtering, run with regexp-filter mode; it allows using regexp group and it can use matched groups as "{{ $1 }}", "{{ $2 }}"...`)
 	flag.StringVar(&webhookHTTPMethod, "http-method", "POST", "HTTP method for webhook request")
-	flag.StringVar(&webhookURL, "url", "", "URL for webhook endpoint. It replaces \"{{ line }}\" token with got line string")
-	flag.Var(&webhookHeadersOpt, "header", "HTTP header for webhook (example: `Content-Type: application/json`). It replaces \"{{ line }}\" token with got line string")
+	flag.StringVar(&webhookURL, "url", "", `URL for webhook endpoint. It replaces "{{ line }}" token with got line string and "{{ $N }}" token with correspond group`)
+	flag.Var(&webhookHeadersOpt, "header", `HTTP header for webhook (example: "Content-Type: application/json"). It replaces "{{ line }}" token with got line string and "{{ $N }}" token with correspond group`)
 	flag.StringVar(&webhookBody, "body", "", "HTTP body for webhook request")
 	flag.IntVar(&webhookTimeoutSec, "timeout-sec", 0, "HTTP timeout for webhook request (default 0, i.e. no-timeout)")
-	flag.BoolVar(&urlEncodeBodyReplacement, "url-encode-body-replacement", false, "Encode the replacement of the body (i.e. the contents of \"{{ line }}\") of webhook request with url (percent) encoding; for \"application/x-www-form-urlencoded\"")
+	flag.BoolVar(&urlEncodeBodyReplacement, "url-encode-body-replacement", false, `Encode the replacement of the body (i.e. the contents of "{{ line }}" and "{{ $N }}") of webhook request with url (percent) encoding; for "application/x-www-form-urlencoded"`)
 	flag.BoolVar(&dryRun, "dry-run", false, "Run this application with dry-run (i.e. it doesn't send any requests to the webhook endpoint)")
 
 	flag.Parse()

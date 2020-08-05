@@ -4,7 +4,7 @@ package filter
 type AllPassFilter struct {
 }
 
-// Match always returns true.
-func (f *AllPassFilter) Match(line string) bool {
-	return true
+// Find always returns `[]string{line}`.
+func (f *AllPassFilter) Find(line string) []string {
+	return []string{line}
 }

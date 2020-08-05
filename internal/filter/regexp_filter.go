@@ -7,7 +7,7 @@ type RegexpFilter struct {
 	Regexp *regexp.Regexp
 }
 
-// Match returns the line is matched with given regular expression.
-func (f *RegexpFilter) Match(line string) bool {
-	return f.Regexp.MatchString(line)
+// Find returns the sub-matched string slice for line according to given regular expression.
+func (f *RegexpFilter) Find(line string) []string {
+	return f.Regexp.FindStringSubmatch(line)
 }

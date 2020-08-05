@@ -49,8 +49,8 @@ func Run(opt *Opt) {
 
 	for stdinScanner.Scan() {
 		line := stdinScanner.Text()
-		if lineFilter.Match(line) {
-			if err := opt.WebhookSender.Send(line); err != nil {
+		if parts := lineFilter.Find(line); len(parts) > 0 {
+			if err := opt.WebhookSender.Send(parts); err != nil {
 				log.Printf("[error] %s", err)
 			}
 		}

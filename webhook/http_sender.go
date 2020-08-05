@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"log"
 	"net/http"
-	"net/url"
 	"strings"
 	"time"
 )
@@ -44,28 +43,24 @@ func NewHTTPSender(httpMethod string, url string, headers http.Header, body stri
 }
 
 // Send sends the request to webhook endpoint over HTTP.
-func (s *HTTPSender) Send(line string) error {
-	webhookURL := replacePlaceholder(s.URL, line)
+func (s *HTTPSender) Send(parts []string) error {
+	webhookURL := replacePlaceholder(s.URL, parts, s.URLEncodeBodyReplacement)
 
 	headers := make(http.Header)
 	for key, headerValues := range s.Headers {
 		headers[key] = func() []string {
 			vs := make([]string, len(headerValues))
 			for i, v := range headerValues {
-				vs[i] = replacePlaceholder(v, line)
+				vs[i] = replacePlaceholder(v, parts, s.URLEncodeBodyReplacement)
 			}
 			return vs
 		}()
 	}
 
-	lineForBody := line
-	if s.URLEncodeBodyReplacement {
-		lineForBody = url.QueryEscape(line)
-	}
-	body := replacePlaceholder(s.Body, lineForBody)
+	body := replacePlaceholder(s.Body, parts, s.URLEncodeBodyReplacement)
 
 	if s.DryRun {
-		log.Printf(`[info] DRY-RUN MODE! %s request to %s; header = %v, body = "%s"`, s.HTTPMethod, webhookURL, headers, lineForBody)
+		log.Printf(`[info] DRY-RUN MODE! %s request to %s; header = %v, body = "%s"`, s.HTTPMethod, webhookURL, headers, body)
 		return nil
 	}
 
@@ -84,6 +79,6 @@ func (s *HTTPSender) Send(line string) error {
 	if statusCode < 200 || statusCode >= 300 {
 		return fmt.Errorf("failed to send data to the webhook destination; statusCode = %d", statusCode)
 	}
-	log.Printf(`[info] sent %s request to %s; statusCode = %d, body = "%s"`, s.HTTPMethod, webhookURL, statusCode, lineForBody)
+	log.Printf(`[info] sent %s request to %s; statusCode = %d, body = "%s"`, s.HTTPMethod, webhookURL, statusCode, body)
 	return nil
 }
