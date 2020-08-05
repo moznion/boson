@@ -47,3 +47,4 @@ echo "2020/08/05 18:11:25 [error] hello" | boson --filter-regexp="^(\d+/\d+/\d+ 
 ## Author
 
 moznion (<moznion@gmail.com>)
+
